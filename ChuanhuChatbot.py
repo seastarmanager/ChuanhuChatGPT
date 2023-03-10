@@ -6,7 +6,7 @@ from utils import *
 from presets import *
 
 my_api_key = ""    # 在这里输入你的 API 密钥
-HIDE_MY_KEY = False # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
+HIDE_MY_KEY = True # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
 
 gr.Chatbot.postprocess = postprocess
 
@@ -42,8 +42,6 @@ else:
 
 with gr.Blocks(css=customCSS) as demo:
     gr.HTML(title)
-    keyTxt = gr.Textbox(show_label=True, placeholder=f"在这里输入你的OpenAI API-key...",
-                        value=my_api_key, label="API Key", type="password", visible=not HIDE_MY_KEY).style(container=True)
     chatbot = gr.Chatbot()  # .style(color_map=("#1D51EE", "#585A5B"))
     history = gr.State([])
     promptTemplates = gr.State(load_template(get_template_names(plain=True)[0], mode=2))
@@ -100,6 +98,8 @@ with gr.Blocks(css=customCSS) as demo:
                                 step=0.1, interactive=True, label="Temperature",)
         #top_k = gr.Slider( minimum=1, maximum=50, value=4, step=1, interactive=True, label="Top-k",)
         #repetition_penalty = gr.Slider( minimum=0.1, maximum=3.0, value=1.03, step=0.01, interactive=True, label="Repetition Penalty", )
+    keyTxt = gr.Textbox(show_label=False, placeholder=f"在这里输入你的OpenAI API-key...",
+                       value=my_api_key, label="API Key", type="password", visible=not HIDE_MY_KEY).style(container=True)
     gr.Markdown(description)
 
 
@@ -124,6 +124,8 @@ with gr.Blocks(css=customCSS) as demo:
     templateRefreshBtn.click(get_template_names, None, [templateFileSelectDropdown])
     templaeFileReadBtn.click(load_template, [templateFileSelectDropdown],  [promptTemplates, templateSelectDropdown], show_progress=True)
     templateApplyBtn.click(lambda x, y: x[y], [promptTemplates, templateSelectDropdown],  [systemPromptTxt], show_progress=True)
+
+get_history_names()
 
 print("川虎的温馨提示：访问 http://localhost:7860 查看界面")
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接

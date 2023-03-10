@@ -131,3 +131,4 @@ dmypy.json
 
 # Mac system file
 **/.DS_Store
+api_key.txt
