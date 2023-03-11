@@ -2,8 +2,10 @@ import gradio as gr
 # import openai
 import os
 import sys
+import argparse
 from utils import *
 from presets import *
+
 
 my_api_key = ""    # 在这里输入你的 API 密钥
 HIDE_MY_KEY = True # 如果你想在UI中隐藏你的 API 密钥，将此值设置为 True
@@ -29,7 +31,7 @@ if dockerflag:
     if not (isinstance(username, type(None)) or isinstance(password, type(None))):
         authflag = True
 else:
-    if os.path.exists("api_key.txt"):
+    if not my_api_key and os.path.exists("api_key.txt") and os.path.getsize("api_key.txt"):
         with open("api_key.txt", "r") as f:
             my_api_key = f.read().strip()
     if os.path.exists("auth.json"):
@@ -67,26 +69,26 @@ with gr.Blocks(css=customCSS) as demo:
         with gr.Column():
             with gr.Row():
                 with gr.Column(scale=6):
-                    templateFileSelectDropdown = gr.Dropdown(label="选择Prompt模板集合文件（.csv）", choices=get_template_names(plain=True), multiselect=False)
+                    templateFileSelectDropdown = gr.Dropdown(label="选择Prompt模板集合文件", choices=get_template_names(plain=True), multiselect=False, value=get_template_names(plain=True)[0])
                 with gr.Column(scale=1):
                     templateRefreshBtn = gr.Button("🔄 刷新")
                     templaeFileReadBtn = gr.Button("📂 读入模板")
             with gr.Row():
                 with gr.Column(scale=6):
-                    templateSelectDropdown = gr.Dropdown(label="从Prompt模板中加载", choices=load_template(get_template_names(plain=True)[0], mode=1), multiselect=False)
+                    templateSelectDropdown = gr.Dropdown(label="从Prompt模板中加载", choices=load_template(get_template_names(plain=True)[0], mode=1), multiselect=False, value=load_template(get_template_names(plain=True)[0], mode=1)[0])
                 with gr.Column(scale=1):
                     templateApplyBtn = gr.Button("⬇️ 应用")
-    with gr.Accordion(label="保存/加载对话历史记录(在文本框中输入文件名，点击“保存对话”按钮，历史记录文件会被存储到Python文件旁边)", open=False):
+    with gr.Accordion(label="保存/加载对话历史记录", open=False):
         with gr.Column():
             with gr.Row():
                 with gr.Column(scale=6):
                     saveFileName = gr.Textbox(
                         show_label=True, placeholder=f"在这里输入保存的文件名...", label="设置保存文件名", value="对话历史记录").style(container=True)
                 with gr.Column(scale=1):
-                    saveBtn = gr.Button("💾 保存对话")
+                    saveHistoryBtn = gr.Button("💾 保存对话")
             with gr.Row():
                 with gr.Column(scale=6):
-                    historyFileSelectDropdown = gr.Dropdown(label="从列表中加载对话", choices=get_history_names(plain=True), multiselect=False)
+                    historyFileSelectDropdown = gr.Dropdown(label="从列表中加载对话", choices=get_history_names(plain=True), multiselect=False, value=get_history_names(plain=True)[0])
                 with gr.Column(scale=1):
                     historyRefreshBtn = gr.Button("🔄 刷新")
                     historyReadBtn = gr.Button("📂 读入对话")
@@ -116,14 +118,14 @@ with gr.Blocks(css=customCSS) as demo:
                      chatbot, history], show_progress=True)
     reduceTokenBtn.click(predict, [txt, top_p, temperature, keyTxt, chatbot, history,
                          systemPromptTxt, FALSECONSTANT, TRUECOMSTANT], [chatbot, history, statusDisplay], show_progress=True)
-    saveBtn.click(save_chat_history, [
+    saveHistoryBtn.click(save_chat_history, [
                   saveFileName, systemPromptTxt, history, chatbot], None, show_progress=True)
-    saveBtn.click(get_history_names, None, [historyFileSelectDropdown])
+    saveHistoryBtn.click(get_history_names, None, [historyFileSelectDropdown])
     historyRefreshBtn.click(get_history_names, None, [historyFileSelectDropdown])
-    historyReadBtn.click(load_chat_history, [historyFileSelectDropdown],  [saveFileName, systemPromptTxt, history, chatbot], show_progress=True)
+    historyReadBtn.click(load_chat_history, [historyFileSelectDropdown, systemPromptTxt, history, chatbot],  [saveFileName, systemPromptTxt, history, chatbot], show_progress=True)
     templateRefreshBtn.click(get_template_names, None, [templateFileSelectDropdown])
     templaeFileReadBtn.click(load_template, [templateFileSelectDropdown],  [promptTemplates, templateSelectDropdown], show_progress=True)
-    templateApplyBtn.click(lambda x, y: x[y], [promptTemplates, templateSelectDropdown],  [systemPromptTxt], show_progress=True)
+    templateApplyBtn.click(get_template_content, [promptTemplates, templateSelectDropdown, systemPromptTxt],  [systemPromptTxt], show_progress=True)
 
 get_history_names()
 
@@ -131,18 +133,19 @@ print("川虎的温馨提示：访问 http://localhost:7860 查看界面")
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
 demo.title = "川虎ChatGPT 🚀"
 
-#if running in Docker
-if dockerflag:
-    if authflag:
-        demo.queue().launch(server_name="0.0.0.0", server_port=7860,auth=(username, password))
+if __name__ == "__main__":
+    #if running in Docker
+    if dockerflag:
+        if authflag:
+            demo.queue().launch(server_name="0.0.0.0", server_port=7860,auth=(username, password))
+        else:
+            demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False)
+    #if not running in Docker
     else:
-        demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False)
-#if not running in Docker
-else:
-    if authflag:
-        demo.queue().launch(share=False, auth=(username, password))
-    else:
-        demo.queue().launch(share=False) # 改为 share=True 可以创建公开分享链接
-    #demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
-    #demo.queue().launch(server_name="0.0.0.0", server_port=7860,auth=("在这里填写用户名", "在这里填写密码")) # 可设置用户名与密码
-    #demo.queue().launch(auth=("在这里填写用户名", "在这里填写密码")) # 适合Nginx反向代理
+        if authflag:
+            demo.queue().launch(share=False, auth=(username, password))
+        else:
+            demo.queue().launch(share=False) # 改为 share=True 可以创建公开分享链接
+        #demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False) # 可自定义端口
+        #demo.queue().launch(server_name="0.0.0.0", server_port=7860,auth=("在这里填写用户名", "在这里填写密码")) # 可设置用户名与密码
+        #demo.queue().launch(auth=("在这里填写用户名", "在这里填写密码")) # 适合Nginx反向代理
