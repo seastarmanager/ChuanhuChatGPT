@@ -208,6 +208,7 @@ def retry(openai_api_key, system_prompt, history, chatbot, token_count, top_p, t
     history.pop()
     inputs = history.pop()["content"]
     token_count.pop()
+    chatbot.pop()
     iter = predict(openai_api_key, system_prompt, history, inputs, chatbot, token_count, top_p, temperature, stream=stream)
     for x in iter:
         yield x

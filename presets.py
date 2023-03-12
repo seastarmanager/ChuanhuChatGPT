@@ -1,4 +1,4 @@
-title = """<h1 align="center">川虎ChatGPT 🚀</h1>"""
+title = """<h1 align="center">ChatGPT 🚀</h1>"""
 description = """<div align=center>
 
 由Bilibili [土川虎虎虎](https://space.bilibili.com/29125536) 和 [明昭MZhao](https://space.bilibili.com/24807452)开发
@@ -32,7 +32,7 @@ pre code {
 
 standard_error_msg = "☹️发生了错误：" # 错误信息的标准前缀
 error_retrieve_prompt = "连接超时，无法获取对话。请检查网络连接，或者API-Key是否有效。" # 获取对话时发生错误
-summarize_prompt = "请总结以上对话，不超过100字。" # 总结对话时的 prompt
+summarize_prompt = "请总结以上对话，不超过500字。" # 总结对话时的 prompt
 max_token_streaming = 3000 # 流式对话时的最大 token 数
 timeout_streaming = 5 # 流式对话时的超时时间
 max_token_all = 3500 # 非流式对话时的最大 token 数

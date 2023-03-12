@@ -54,10 +54,10 @@ with gr.Blocks(css=customCSS) as demo:
 
     with gr.Row():
         with gr.Column(scale=12):
-            user_input = gr.Textbox(show_label=False, placeholder="在这里输入").style(
+            user_input = gr.Textbox(show_label=False, placeholder="在这里输入对话内容").style(
                 container=False)
         with gr.Column(min_width=50, scale=1):
-            submitBtn = gr.Button("🚀", variant="primary")
+            submitBtn = gr.Button("🚀发送", variant="primary")
     with gr.Row():
         emptyBtn = gr.Button("🧹 新的对话")
         retryBtn = gr.Button("🔄 重新生成")
@@ -142,15 +142,15 @@ get_history_names()
 
 print("川虎的温馨提示：访问 http://localhost:7860 查看界面")
 # 默认开启本地服务器，默认可以直接从IP访问，默认不创建公开分享链接
-demo.title = "川虎ChatGPT 🚀"
+demo.title = "ChatGPT 🚀"
 
 if __name__ == "__main__":
     #if running in Docker
     if dockerflag:
         if authflag:
-            demo.queue().launch(server_name="0.0.0.0", server_port=7860,auth=(username, password))
+            demo.queue().launch(server_name="0.0.0.0", server_port=9182,auth=(username, password))
         else:
-            demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False)
+            demo.queue().launch(server_name="0.0.0.0", server_port=9182, share=False)
     #if not running in Docker
     else:
         if authflag:
