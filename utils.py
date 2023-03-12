@@ -155,7 +155,10 @@ def predict(inputs, top_p, temperature, openai_api_key, chatbot=[], history=[], 
 
     counter = 0
     if stream:
-        chatbot.append((parse_text(history[-1]), ""))
+        if retry:
+            chatbot.append((parse_text(history[-1]), ""))
+        else:
+            chatbot.append((parse_text(history[-1]), ""))
         for chunk in response.iter_lines():
             if counter == 0:
                 counter += 1
